@@ -10,7 +10,7 @@ from obspy.clients.fdsn import Client
 #----- parameters to modify 
 
 outputdir = '/srv/shared/wiggles'
-inputfile = 'Labeled_arrivals_from_UWdatabase.txt'
+inputfile = 'arrivals.csv'
 TBeforeArrival = 5.
 TAfterArrival = 5.
 highpassfiltercorner = 1.0
@@ -20,30 +20,31 @@ client = Client("IRIS")
 
 #---- Function to read infile
 
+import csv
 def parse_input_file(filename):
     request = {}
     for t in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
         request[t] = []
-    with open(filename, 'r') as infile:
-        for line in infile: 
+    with open(filename) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
             pick = {}
-            pick_line = line.split(',')
-            pick['event_type'] = pick_line[0].replace('[','').replace("'",'').strip()
-            pick['time'] = pick_line[1].replace("'",'').strip()
-            pick['sta'] = pick_line[2].replace("'",'').strip()
-            pick['net'] = pick_line[3].replace("'",'').strip()
-            pick['loc'] = pick_line[4].replace("'",'').strip()
-            pick['chan'] = pick_line[5].replace("'",'').strip()
-            pick['pick_type'] = pick_line[6].replace("'",'').strip()
-            pick['quality'] = pick_line[7].replace("'",'').strip()
-            pick['who'] = pick_line[8].replace(']','').replace("'",'').strip()
+            pick['event_type'] = row[0].strip()
+            pick['time'] = row[1].strip()
+            pick['sta'] = row[2].strip()
+            pick['net'] = row[3].strip()
+            pick['loc'] = row[4].strip()
+            pick['chan'] = row[5].strip()
+            pick['pick_type'] = row[6].strip()
+            pick['quality'] = row[7].strip()
+            pick['who'] = row[8].strip()
             #print(pick) 
             key = "{}{}".format(pick['event_type'], pick['pick_type'])
-            print(key)
             request[key].append(pick)
+    return request
 
-parse_input_file('Labeled_arrivals_from_UWdatabase.txt')
-
+thing = parse_input_file(inputfile)
+print(type(thing))
 
 taperlen = (2./highpassfiltercorner)
 
