@@ -78,16 +78,18 @@ for row in thing[etype]:
     netstatloc = net + '.' + stat + '.' + loc 
     if ( netstatloc not in downloaded_netstatloc ):
         downloaded_netstatloc.append(netstatloc)
+        utoriginal = float(row['time'])
         unixtime = float(row['time']) - LeapSecondFudge
         ut = UTCDateTime(unixtime)
         T1 = ut - TBeforeArrival - timebuffer
         T2 = ut + TAfterArrival + timebuffer
+        T = utoriginal
         print("TIMES " + str(T1) + "   " + str(ut) + "   " + str(T2) )
 #        print("TRYING: " + sncl + " " + str(ut) + " " + str(T1) + " " + str(row['time'])  )
         minlen = T2 - T1 - 1
-        strdate = str(T1.year) + str(T1.month).zfill(2) + str(T1.day).zfill(2) + \
-                  str(T1.hour).zfill(2) + str(T1.minute).zfill(2) + \
-                  str(T1.second).zfill(2)
+        strdate = str(T.year) + str(T.month).zfill(2) + str(T.day).zfill(2) + \
+                  str(T.hour).zfill(2) + str(T1.minute).zfill(2) + \
+                  str(T.second).zfill(2)
         fname = sncl + "." + strdate + ".mseed"
         try:
             chan = chan[:2] + "N"
