@@ -1,83 +1,92 @@
-#!/home/ahutko/anaconda3/bin/python
+#!/anaconda3/bin/python
+
+#----- import modules
 
 import psycopg2
 import obspy
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
+from time_series import *
 
-#--------- parameters to modify ----------
-client = Client("IRIS")
-eqtime = UTCDateTime("2019-07-12T09:51:38")
-label = "Monroe_M4.6"
-TBeforeArrival = 90.
-TAfterArrival = 90.
+#----- parameters to modify 
+
+outputdir = '/srv/shared/wiggles'
+inputfile = 'arrivals.csv'
+TBeforeArrival = 10.
+TAfterArrival = 10.
+LeapSecondFudge = 27  # Fudge factor.  Subtract this from all times.
+highpassfiltercorner = 0.3
+timebuffer = 15.
 common_sample_rate = 100.  # in Hz
-#-----------------------------------------
+client = Client("IRIS")
+etype = 'EQP'
+label = 'test'
+
+#---- Function to read infile
+
+import csv
+def parse_input_file(filename):
+    request = {}
+    for t in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
+        request[t] = []
+    with open(filename) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            pick = {}
+            pick['event_type'] = row[0].strip()
+            pick['time'] = row[1].strip()
+            pick['sta'] = row[2].strip()
+            pick['net'] = row[3].strip()
+            pick['loc'] = row[4].strip()
+            pick['chan'] = row[5].strip()
+            pick['pick_type'] = row[6].strip()
+            pick['quality'] = row[7].strip()
+            pick['who'] = row[8].strip()
+            #print(pick) 
+            key = "{}{}".format(pick['event_type'], pick['pick_type'])
+            request[key].append(pick)
+    return request
+
+#----- Start the main program
+
+thing = parse_input_file(inputfile)
+#print(thing['THS'])
+#for row in thing[etype]:
+#    print(row['sta'])
+
+taperlen = (2./highpassfiltercorner)
 
 f0 = open(label + ".in",'w')
 f1 = open(label + ".out.database",'w')
 
-#--------- get picks from PNSN database -------------
-# https://internal.pnsn.org/LOCAL/WikiDocs/index.php/Accessing_the_AQMS_databases
-
-#arrival table:
-#rflag: H = human, A = automatic, F = finalized
-#archdb=> select * from arrival limit 10;
-#   arid   | commid |     datetime     | sta  | net | auth | subsource | channel | channelsrc | seedchan | location | iphase | qual | clockqual | clockcorr | ccset | fm | ema | azimuth | slow | deltim | d
-#elinc | delaz | delslo | quality | snr | rflag |       lddate        
-#----------+--------+------------------+------+-----+------+-----------+---------+------------+----------+----------+--------+------+-----------+-----------+-------+----+-----+---------+------+--------+--
-#------+-------+--------+---------+-----+-------+---------------------
-# 10576803 |        | 1329276740.71738 | KEB  | NC  | UW   | Jiggle    |         |            | HHZ      |          | P      | i    |           |           |       | d. |     |         |      |   0.06 |      |       |        |     0.8 |     | H     | 2012-03-12 18:33:05
-# 10576808 |        |  1329276770.3577 | KEB  | NC  | UW   | Jiggle    |         |            | HHN      |          | S      | e    |           |           |       | .. |     |         |      |    0.3 |      |       |        |     0.3 |     | H     | 2012-03-12 18:33:05
-# 10576813 |        | 1329276742.40491 | TAKO | UW  | UW   | Jiggle    |         |            | BHZ      |          | P      | i    |           |           |       | c. |     |         |      |   0.06 |      |       |        |     0.8 |     | H     | 2012-03-12 18:33:05
-# 10576818 |        | 1329276774.06588 | TAKO | UW  | UW   | Jiggle    |         |            | BHE      |          | S      | e    |           |           |       | .. |     |         |      |   0.15 |       |       |        |     0.5 |     | H     | 2012-03-12 18:33:05
-
-#----- Connect to database
-
-dbname = '#####'
-dbuser = '#####'
-hostname = '#####'   # check if pp1 or pp2 is the current sarchdb
-dbpass = '#####'
-
-conn = psycopg2.connect(dbname=dbname, user=dbuser, host=hostname, password=dbpass)
-cursor = conn.cursor()
-
-#----- From database, get all arrivals within a small time window
-
-epoch0time = UTCDateTime("1970-01-01T00:00:00")
-eqepoch1 = eqtime - epoch0time - 5
-eqepoch2 = eqtime - epoch0time + 90
-
-#cursor.execute('INSERT INTO metrics (metric,unit,description,created_at,updated_at) VALUES (%s, %s, %s, %s, %s)', (metric,unit,description,now,now) )
-#        cursor.execute('UPDATE scnls SET nslc = (%s) WHERE net = (%s) AND sta = (%s) AND loc = (%s) AND chan = (%s)',(sncl, net, sta, loc, chan))
-
-cursor.execute('select * from arrival where datetime > (%s) and datetime < (%s) ;', (eqepoch1, eqepoch2) )
-
 #----- Sweep through each arrival, download Z+N+E data, write as mseed file
+
+
+#{'event_type': 'PX', 'time': '1506558928.95844', 'sta': 'BOW', 'net': 'UW', 'loc': '', 'chan': 'EHZ', 'pick_type': 'P', 'quality': 'e', 'who': 'H'}
 
 n = 0
 downloaded_netstatloc = []
-for record in cursor:
-#  if ( n < 10 ):
-    n += 1
-    net = record[4]
-    stat = record[3]
-    chan = record[9]
-    loc = record[10]
-    phase = record[11]
-    qual = record[12]
-    if ( loc == "  " ):
+for row in thing[etype]:
+  if ( n < 4 ):
+    net = row['net']
+    stat = row['sta']
+    loc = row['loc']
+    if ( loc == "" ):
         loc = "--"
+    chan = row['chan']
+    phase = row['pick_type']
+    qual = row['quality']
     sncl = net + '.' + stat + '.' + loc + '.' + chan
     netstatloc = net + '.' + stat + '.' + loc 
     if ( netstatloc not in downloaded_netstatloc ):
         downloaded_netstatloc.append(netstatloc)
-        unixtime = record[2]
+        unixtime = float(row['time']) - LeapSecondFudge
         ut = UTCDateTime(unixtime)
-        T1 = ut - TAfterArrival
-        T2 = ut + TBeforeArrival
+        T1 = ut - TBeforeArrival - timebuffer
+        T2 = ut + TAfterArrival + timebuffer
+        print("TIMES " + str(T1) + "   " + str(ut) + "   " + str(T2) )
+#        print("TRYING: " + sncl + " " + str(ut) + " " + str(T1) + " " + str(row['time'])  )
         minlen = T2 - T1 - 1
-        minlen = 1
         strdate = str(T1.year) + str(T1.month).zfill(2) + str(T1.day).zfill(2) + \
                   str(T1.hour).zfill(2) + str(T1.minute).zfill(2) + \
                   str(T1.second).zfill(2)
@@ -85,35 +94,62 @@ for record in cursor:
         try:
             chan = chan[:2] + "N"
             fnameN = netstatloc + "." + chan + "." + strdate + ".mseed"
-            st = client.get_waveforms(network=net, station=stat, location=loc, 
+            stN = client.get_waveforms(network=net, station=stat, location=loc, 
                                       channel=chan, starttime=T1, endtime=T2, 
                                       minimumlength = minlen, longestonly = True,
-                                      filename = fnameN )
+                                      attach_response = True )
             chan = chan[:2] + "E"
             fnameE = netstatloc + "." + chan + "." + strdate + ".mseed"
-            st = client.get_waveforms(network=net, station=stat, location=loc, 
+            stE = client.get_waveforms(network=net, station=stat, location=loc, 
                                       channel=chan, starttime=T1, endtime=T2, 
                                       minimumlength = minlen, longestonly = True,
-                                      filename = fnameE )
+                                      attach_response = True )
             chan = chan[:2] + "Z"
             fnameZ = netstatloc + "." + chan + "." + strdate + ".mseed"
-            st = client.get_waveforms(network=net, station=stat, location=loc, 
+            stZ = client.get_waveforms(network=net, station=stat, location=loc, 
                                       channel=chan, starttime=T1, endtime=T2, 
                                       minimumlength = minlen, longestonly = True,
-                                      filename = fnameZ )
-            #----- make sure it's the correct sampling rate
-            if ( st[0].stats.sampling_rate > common_sample_rate ):
-                factor = st[0].stats.sampling_rate / common_sample_rate
-                factor_mod = st[0].stats.sampling_rate % common_sample_rate
-            if ( factor_mod == 0 ):
-                st.decimate(factor)
+                                      attach_response = True )
+            #----- demean and taper the data
+            stN.detrend(type='demean')
+            stE.detrend(type='demean')
+            stZ.detrend(type='demean')
+            stN.taper(0.5, max_length = taperlen)
+            stE.taper(0.5, max_length = taperlen)
+            stZ.taper(0.5, max_length = taperlen)
+
+            #----- if it's acceleration data, convert to velocity
+            if ( chan[1:2] == 'N' ):
+                stN.remove_response(output = 'VEL', pre_filt = ( 0.3, 0.5, 40., 45.))
+                stE.remove_response(output = 'VEL', pre_filt = ( 0.3, 0.5, 40., 45.))
+                stZ.remove_response(output = 'VEL', pre_filt = ( 0.3, 0.5, 40., 45.))
+            elif ( chan[1:2] == 'H' ):
+                iskip_response_removal = 1
             else:
-                st.interpolate(sampling_rate = common_sample_rate)
+                iskip_this_station = 1/0
+
+            #----- high-pass filter everything above 1 Hz
+            stN.filter('highpass', freq=highpassfiltercorner)
+            stE.filter('highpass', freq=highpassfiltercorner)
+            stZ.filter('highpass', freq=highpassfiltercorner)
+
+            #----- make sure it's the correct sampling rate
+            correct_sample_rate(stN, common_sample_rate)
+            correct_sample_rate(stE, common_sample_rate)
+            correct_sample_rate(stZ, common_sample_rate)
+
+            #----- trim data to common start/endtimes and Npoints
+            trim_to_common_times(stN, stE, stZ, timebuffer)
+
             #----- write out the data to an .mseed file
+            stN.write(fnameN, format='MSEED')
+            stE.write(fnameE, format='MSEED')
+            stZ.write(fnameZ, format='MSEED')
 
             f0.write( str(fnameN) + " " + str(fnameE) + " " + str(fnameZ) + '\n' )
-            f1.write( net + " " + stat + " " + phase + " " + str(ut)[:-1] + " " + str(qual) + '\n' )  # AZ TRO P 2016-06-10T00:03:53.808300
+            f1.write( net + " " + stat + " " + phase + " " + str(ut)[:-1] + " " + str(qual) + " " + etype + '\n' )  # AZ TRO P 2016-06-10T00:03:53.808300
             print("Downloaded ",fname)
+            n += 1
         except:
             print("Download failed for ",fname)
 
