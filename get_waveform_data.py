@@ -93,19 +93,19 @@ for row in thing[etype]:
         fname = sncl + "." + strdate + ".mseed"
         try:
             chan = chan[:2] + "N"
-            fnameN = netstatloc + "." + chan + "." + strdate + ".mseed"
+            fnameN = outputdir + "/" + netstatloc + "." + chan + "." + strdate + ".mseed"
             stN = client.get_waveforms(network=net, station=stat, location=loc, 
                                       channel=chan, starttime=T1, endtime=T2, 
                                       minimumlength = minlen, longestonly = True,
                                       attach_response = True )
             chan = chan[:2] + "E"
-            fnameE = netstatloc + "." + chan + "." + strdate + ".mseed"
+            fnameE = outputdir + "/" + netstatloc + "." + chan + "." + strdate + ".mseed"
             stE = client.get_waveforms(network=net, station=stat, location=loc, 
                                       channel=chan, starttime=T1, endtime=T2, 
                                       minimumlength = minlen, longestonly = True,
                                       attach_response = True )
             chan = chan[:2] + "Z"
-            fnameZ = netstatloc + "." + chan + "." + strdate + ".mseed"
+            fnameZ = outputdir + "/" + netstatloc + "." + chan + "." + strdate + ".mseed"
             stZ = client.get_waveforms(network=net, station=stat, location=loc, 
                                       channel=chan, starttime=T1, endtime=T2, 
                                       minimumlength = minlen, longestonly = True,
