@@ -119,4 +119,3 @@ for record in cursor:
 
 f0.close()
 f1.close()
-
