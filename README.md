@@ -1,31 +1,22 @@
-# Seismic wiggle discriminator
+# Seismic wiggle discriminator aka the Amy2000
+This is a project developed by team Wiggle from the [2019 Geohack Week](https://geohackweek.github.io/) at the University of Washington. 
 
-When you see wiggle records of ground motion and there's a spike, what casued it?  We'll 
+The scope of the Wiggle project has two goals. 1) Test the [Generalized Phase Detection](https://github.com/interseismic/generalized-phase-detection) (GDP), which was trained on Southern California events, using [Pacific Northwest Seismic Network](https://pnsn.org) (PNSN) event data. 2) Train the GDP with the following event types:
+* Surface Events
+* Explosions
+* Thunder
+* Sonic Shockwave
 
-## Files
+# Data
+Arrival data were querried from the pick data in the PNSN AQMS database. Pick data were then used to download the channel data from [IRIS](https://iris.edu)
 
-* `.gitignore`
-<br> Globally ignored files by `git` for the project.
-* `environment.yml`
-<br> `conda` environment description needed to run this project.
-* `README.md`
-<br> Description of the project. [Sample](https://geohackweek.github.io/wiki/github_project_management.html#project-guidelines)
+# Contributors
+* Jon Connolly joncon@uw.edu
+* Bao Tran Do trando46@gmail.com
+* Ariane Ducellier ducela@uw.edu
+* Alex Hutko ahutko@uw.edu 
+* Gabija Pasiunaite gabija.pasiunaite@gmail.com
+* Rhythm Shah rhythm_shah99@yahoo.com
+* Liang Xue  xlia@okstate.edu
 
-## Folders
-
-### `contributors`
-A seismology team to provide a data set of wiggles and labels.
-A machine learning team to choose what kind of model we should use.
-A data format team to convert data into the appropriate format for the machine learning.
-
-Each team member has it's own folder under contributors, where he/she can
-work on their contribution. Having a dedicated folder for one-self helps to 
-prevent conflicts when merging with master.
-
-### `notebooks`
-Notebooks that are considered delivered results for the project should go in
-here.
-
-### `scripts`
-Helper utilities that are shared with the team
 
