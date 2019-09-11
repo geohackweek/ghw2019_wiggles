@@ -1,20 +1,49 @@
 #!/home/ahutko/anaconda3/bin/python
 
+#----- import modules
+
 import psycopg2
 import obspy
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
 
-#--------- parameters to modify ----------
-client = Client("IRIS")
-eqtime = UTCDateTime("2019-07-12T09:51:38")
-label = "Monroe_M4.6"
+#----- parameters to modify 
+
+outputdir = '/srv/shared/wiggles'
+inputfile = 'Labeled_arrivals_from_UWdatabase.txt'
 TBeforeArrival = 5.
 TAfterArrival = 5.
 highpassfiltercorner = 1.0
-timebuffer = 10.
+timebuffer = 15.
 common_sample_rate = 100.  # in Hz
-#-----------------------------------------
+client = Client("IRIS")
+
+#---- Function to read infile
+
+def parse_input_file(filename):
+    request = {}
+    for t in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
+        request[t] = []
+    with open(filename, 'r') as infile:
+        for line in infile: 
+            pick = {}
+            pick_line = line.split(',')
+            pick['event_type'] = pick_line[0].replace('[','').replace("'",'').strip()
+            pick['time'] = pick_line[1].replace("'",'').strip()
+            pick['sta'] = pick_line[2].replace("'",'').strip()
+            pick['net'] = pick_line[3].replace("'",'').strip()
+            pick['loc'] = pick_line[4].replace("'",'').strip()
+            pick['chan'] = pick_line[5].replace("'",'').strip()
+            pick['pick_type'] = pick_line[6].replace("'",'').strip()
+            pick['quality'] = pick_line[7].replace("'",'').strip()
+            pick['who'] = pick_line[8].replace(']','').replace("'",'').strip()
+            #print(pick) 
+            key = "{}{}".format(pick['event_type'], pick['pick_type'])
+            print(key)
+            request[key].append(pick)
+
+parse_input_file('Labeled_arrivals_from_UWdatabase.txt')
+
 
 taperlen = (2./highpassfiltercorner)
 
