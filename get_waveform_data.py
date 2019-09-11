@@ -1,5 +1,3 @@
-#!/anaconda3/bin/python
-
 #----- import modules
 
 import psycopg2
