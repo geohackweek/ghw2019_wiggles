@@ -154,4 +154,3 @@ for etype in etype_list:
 
     f0.close()
     f1.close()
-
