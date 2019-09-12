@@ -32,6 +32,7 @@ with open(truth_file) as f:
         formatted_time = datetime.strptime(tmp[3], "%Y-%m-%dT%H:%M:%S.%f") # parse str to datetime object
         truth_arr.append([tmp[0], tmp[1], tmp[2], formatted_time, tmp[4], tmp[5]])
         
+# Parse csv  in PNSN data 
         
 networks = ['CC', 'PP', 'KK']
 stations = ['SIFT', 'RUSH', 'PR05', 'OBSR']
@@ -74,21 +75,22 @@ def key_lookup(event):
 outp_file = open(outp_name, 'w')
 for event in truth_arr:
     phases_times = key_lookup(event)
-    res = phases_times[1]
     phase = phases_times[0]
+    res = phases_times[1]
+    
     # filter events in +-5s time window
     t = event[3] 
     t_lower = t - timedelta(seconds=5)
     t_upper = t + timedelta(seconds=5) 
-    arrivals_window = []
     outp_file.write(str(event[5]) + " " + str(phase))
     for time in res:
         if time > t_lower and time < t_upper:
             offset = abs(t - time)
             offset = offset.total_seconds()
-            arrivals_window.append(time)
+            outp_file.write(" " + str(offset))
+        elif time == numpy.nan:
             outp_file.write(" " + str(offset))
     outp_file.write('\n')
 outp_file.close()
 
-
+print('nan:', numpy.nan)
