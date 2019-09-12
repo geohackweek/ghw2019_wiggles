@@ -9,7 +9,7 @@ from datetime import datetime
 from datetime import timedelta
 
 # ------------------- dirs need updating ---------------
-model_file = 'test.out'
+model_file = 'GPD.THP.out'
 truth_file = 'arrivals.csv'
 outp_name = 'comparison.out'
 fudge_factor = timedelta(seconds=27)
@@ -25,8 +25,6 @@ def read_arrivals_to_list(filename):
             line = []
             line.extend([row[3].strip(), row[2].strip(), row[6].strip()])
             formatted_time = datetime.fromtimestamp(float(row[1].strip())) - fudge_factor
-            print(formatted_time, datetime.fromtimestamp(float(row[1].strip())))
-            
             line.extend([formatted_time, row[7].strip(), row[0].strip()+row[6].strip()])
             model_list.append(line)
     return model_list
