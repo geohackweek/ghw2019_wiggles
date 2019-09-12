@@ -47,10 +47,7 @@ def parse_input_file(filename):
 
 #----- Start the main program
 
-thing = parse_input_file(inputfile)
-#print(thing['THS'])
-#for row in thing[etype]:
-#    print(row['sta'])
+etype_dict = parse_input_file(inputfile)
 
 taperlen = (2./highpassfiltercorner)
 
@@ -64,8 +61,8 @@ f1 = open(label + ".out.database",'w')
 
 n = 0
 downloaded_netstatloc = []
-for row in thing[etype]:
-  if ( n < 4 ):
+for row in etype_dict[etype]:
+#  if ( n < 4 ):
     net = row['net']
     stat = row['sta']
     loc = row['loc']
@@ -84,7 +81,6 @@ for row in thing[etype]:
         T1 = ut - TBeforeArrival - timebuffer
         T2 = ut + TAfterArrival + timebuffer
         T = utoriginal
-        print("TIMES " + str(T1) + "   " + str(ut) + "   " + str(T2) )
 #        print("TRYING: " + sncl + " " + str(ut) + " " + str(T1) + " " + str(row['time'])  )
         minlen = T2 - T1 - 1
         strdate = str(T.year) + str(T.month).zfill(2) + str(T.day).zfill(2) + \
