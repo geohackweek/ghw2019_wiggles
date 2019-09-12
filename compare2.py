@@ -8,47 +8,31 @@ import csv
 from datetime import datetime
 from datetime import timedelta
 
-# ---------------- input file structure -----------------
-# test.in: 
-#  line: 3 .mseed files corresponding to 1 event (N, E, Z components)
-
-# test.out: -> GDP model output 
-#  line: 4 outputs: network name, station name, label (P/S), time 
-
-# test.out.database: -> PNSN labelled event data
-#  line: 6 outputs: network name, station name, label (P/S), time, quality measure (i/e/None), event type (EQP, EQS, ...)
-
 # ------------------- dirs need updating ---------------
 model_file = 'test.out'
-truth_file = 'test.out.database'
+truth_file = 'arrivals.csv'
 outp_name = 'comparison.out'
 fudge_factor = timedelta(seconds=27)
 
 # ------------------
-# Read in PNSN data and store it as an array
+# Read in PNSN .csv data and store it as an array
 truth_arr = []
-"""
 def read_arrivals_to_list(filename):
-    '''Read arrivals csv file and stuff into 2-dim array'''
     model_list = []
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            model_list.append(row)
+            line = []
+            line.extend([row[3].strip(), row[2].strip(), row[6].strip()])
+            formatted_time = datetime.fromtimestamp(float(row[1].strip())) - fudge_factor
+            print(formatted_time, datetime.fromtimestamp(float(row[1].strip())))
+            
+            line.extend([formatted_time, row[7].strip(), row[0].strip()+row[6].strip()])
+            model_list.append(line)
     return model_list
-    
+truth_arr = read_arrivals_to_list(truth_file)
 
-truth_arr = read_arrivals_to_list("arrivals.csv")
-"""
-
-with open(truth_file) as f:
-    for line in f:
-        tmp = line.split()
-        formatted_time = datetime.strptime(tmp[3], "%Y-%m-%dT%H:%M:%S.%f") # parse str to datetime object
-        truth_arr.append([tmp[0], tmp[1], tmp[2], formatted_time, tmp[4], tmp[5]])
-    # datetime.fromtimestamp(float(time))
-# 
-
+# read in Caltech model output and create a dictionary
 def read_output_to_dict(filename):
     model_dict = {}
     with open(filename) as f:
@@ -85,22 +69,20 @@ def time_lookup(t, time_arr):
             offsets.append(offset)
     return offsets 
 
+# write outputs to file
 outp_file = open(outp_name, 'w')
 for event in truth_arr:
     phase = event[2]
     times = key_lookup(event, phase)
-    print('times1:', times)
     if len(times) == 0:
         if phase == 'P':
             phase = 'S'
         else:
             phase = 'P'
         times = key_lookup(event, phase)
-        print('time0:', times)
     if len(times) == 0:
         phase = 'N'
         times = ['nan']
-        print('empty', times)
     outp_file.write(str(event[5]) + " " + phase)
     for offset in times:
         outp_file.write(" " + str(offset))
