@@ -53,7 +53,7 @@ taperlen = (3./highpassfiltercorner)
 #----- Sweep through each arrival, download Z+N+E data, write as mseed file
 
 n = 0
-etype_list = ['EQP','SUP','THP','SNP','PXP']
+etype_list = ['SUP','THP','SNP','PXP']
 #etype_list = ['EQS','SUS','THS','SNS','PXS']
 #etype_list = ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']
 for etype in etype_list:

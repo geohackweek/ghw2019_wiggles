@@ -1,5 +1,6 @@
 #----- import modules
 
+import os.path
 import time
 import obspy
 from obspy import UTCDateTime
@@ -52,16 +53,16 @@ taperlen = (3./highpassfiltercorner)
 #----- Sweep through each arrival, download Z+N+E data, write as mseed file
 
 n = 0
-#etype_list = ['SUP','THP','SNP','PXP']
-etype_list = ['SUS','THS','SNS','PXS']
+#etype_list = ['EQP','SUP','THP','SNP','PXP']
+etype_list = ['EQS','SUS','THS','SNS','PXS']
 #etype_list = ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']
 for etype in etype_list:
-    f0 = open(label + "." + etype + ".in",'a')
+    f0 = open(labepython get _waveform_data_temp1.pyl + "." + etype + ".in",'a')
     f1 = open(label + "." + etype + ".out.database",'a')
     n = 0
     for row in etype_dict[etype]:
 #    if ( n < 8 ):   # put on the brakes, just for testing
-        time.sleep(0.025)  # make sure we don't request data too fast
+        time.sleep(0.01)  # make sure we don't request data too fast
         net = row['net']
         stat = row['sta']
         loc = row['loc']
@@ -84,7 +85,12 @@ for etype in etype_list:
                   str(T.hour).zfill(2) + str(T1.minute).zfill(2) + \
                   str(T.second).zfill(2)
         fname = sncl + "." + strdate + ".mseed"
-        try:
+        chan = chan[:2] + "Z"
+        checkfile = outputdir + "/" + etype + "/" + netstatloc + "." + chan + "." + strdate + ".mseed"
+        if ( os.path.isfile(checkfile) is True ):
+            print("Already downloaded ",checkfile)
+        else:
+          try:
             chan = chan[:2] + "N"
             fnameN = outputdir + "/" + etype + "/" + netstatloc + "." + chan + "." + strdate + ".mseed"
             stN = client.get_waveforms(network=net, station=stat, location=loc, 
@@ -143,7 +149,7 @@ for etype in etype_list:
             f1.write( net + " " + stat + " " + phase + " " + str(ut)[:-1] + " " + str(qual) + " " + etype + '\n' )  # AZ TRO P 2016-06-10T00:03:53.808300
             print("Downloaded ",fname)
             n += 1
-        except:
+          except:
             print("Download failed for ",fname)
 
     f0.close()
