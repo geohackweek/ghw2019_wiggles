@@ -10,10 +10,10 @@ from time_series import *
 
 outputdir = '/srv/shared/wiggles'
 inputfile = 'arrivals.csv'
-TBeforeArrival = 10.
-TAfterArrival = 10.
+TBeforeArrival = 5.
+TAfterArrival = 5.
 LeapSecondFudge = 27  # Fudge factor.  Subtract this from all times.
-highpassfiltercorner = 0.3
+highpassfiltercorner = 0.5
 timebuffer = 15.
 common_sample_rate = 100.  # in Hz
 client = Client("IRIS")
@@ -49,20 +49,21 @@ def parse_input_file(filename):
 
 etype_dict = parse_input_file(inputfile)
 
-taperlen = (2./highpassfiltercorner)
+taperlen = (3./highpassfiltercorner)
 
 f0 = open(label + ".in",'w')
 f1 = open(label + ".out.database",'w')
 
 #----- Sweep through each arrival, download Z+N+E data, write as mseed file
 
-
-#{'event_type': 'PX', 'time': '1506558928.95844', 'sta': 'BOW', 'net': 'UW', 'loc': '', 'chan': 'EHZ', 'pick_type': 'P', 'quality': 'e', 'who': 'H'}
-
 n = 0
 downloaded_netstatloc = []
-for row in etype_dict[etype]:
-#  if ( n < 4 ):
+#etype_list = ['EQP','SUP','THP','SNP','PXP']
+etype_list = ['EQS','SUS','THS','SNS','PXS']
+for etype in etype_list:
+ n = 0
+ for row in etype_dict[etype]:
+  if ( n < 8 ):   # put on the brakes, just for testing
     net = row['net']
     stat = row['sta']
     loc = row['loc']
@@ -80,7 +81,7 @@ for row in etype_dict[etype]:
         ut = UTCDateTime(unixtime)
         T1 = ut - TBeforeArrival - timebuffer
         T2 = ut + TAfterArrival + timebuffer
-        T = utoriginal
+        T = UTCDateTime(utoriginal)
 #        print("TRYING: " + sncl + " " + str(ut) + " " + str(T1) + " " + str(row['time'])  )
         minlen = T2 - T1 - 1
         strdate = str(T.year) + str(T.month).zfill(2) + str(T.day).zfill(2) + \
