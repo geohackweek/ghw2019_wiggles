@@ -32,6 +32,7 @@ with open(truth_file) as f:
         
 print(truth_arr)
 
+"""
 # time search algorithm for model data
 def search_model_file(event):
     t = event[3] 
@@ -57,6 +58,35 @@ def search_model_file(event):
                     phase_check = True
     return [phase_check, outp]
 
+"""
+  
+# create dictionary
+'''
+{
+CC-SIFT-P: [time1, time2, time3, time4],
+CC-RUSH-S: [time1,time2, time3...]
+}
+'''
+# names???
+networks = ['CC', 'PP', 'KK']
+stations = ['SIFT', 'RUSH', 'PR05', 'OBSR']
+phases = ['P', 'S']
+dict = {}
+
+# create dicitonary keys
+for netw in networks:
+    for stat in stations:
+        for phase in phases:
+            dict[netw + "-" + stat + "-" + phase] = []
+            
+# read model file and add parsed datetime obj to dict
+with open(model_file) as f:
+        for line in f:
+            tmp = line.split()
+            formatted_time = datetime.strptime(tmp[3], "%Y-%m-%dT%H:%M:%S.%f") # parse str to datetime object
+            dict[tmp[0] + "-" + tmp[1] + "-" + tmp[2]].append(formatted_time) 
+print (dict)
+
 # Check whether PNSN event was detected by the GDP model and write output to file
 outp_file = open(outp_name, 'w')
 for event in truth_arr:
@@ -65,6 +95,3 @@ for event in truth_arr:
     outp_file.write(str(res[0]) + " " + str(res[1]) + " " + str(res[2]) + '\n' )
 outp_file.close()
 
-    
-    
-    
