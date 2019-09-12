@@ -57,7 +57,7 @@ etype_list = ['EQP','SUP','THP','SNP','PXP']
 #etype_list = ['EQS','SUS','THS','SNS','PXS']
 #etype_list = ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']
 for etype in etype_list:
-    f0 = open(labepython get _waveform_data_temp1.pyl + "." + etype + ".in",'a')
+    f0 = open(label + "temp1." + etype + ".in",'a')
     f1 = open(label + "." + etype + ".out.database",'a')
     n = 0
     for row in etype_dict[etype]:
