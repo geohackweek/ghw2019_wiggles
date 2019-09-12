@@ -1,0 +1,7 @@
+# columns are: 1) etype label from UW database 2) label from Caltech gpd_predict.py ('P' or 'S')
+#              3) caltech time - UW time in sec.  NaN = there was no Caltech prediction within +/- 5 sec.
+EQP, P, -2.5
+EQP, P, 0.55
+EQP, N, NaN
+EQP, S, 1.4
+EQP, P, 3.2

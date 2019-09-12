@@ -58,12 +58,12 @@ f1 = open(label + ".out.database",'w')
 
 n = 0
 downloaded_netstatloc = []
-#etype_list = ['EQP','SUP','THP','SNP','PXP']
-etype_list = ['EQS','SUS','THS','SNS','PXS']
+etype_list = ['EQP','SUP','THP','SNP','PXP']
+#etype_list = ['EQS','SUS','THS','SNS','PXS']
 for etype in etype_list:
  n = 0
  for row in etype_dict[etype]:
-  if ( n < 8 ):   # put on the brakes, just for testing
+#  if ( n < 8 ):   # put on the brakes, just for testing
     net = row['net']
     stat = row['sta']
     loc = row['loc']
