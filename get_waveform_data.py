@@ -1,6 +1,6 @@
 #----- import modules
 
-import psycopg2
+import time
 import obspy
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
@@ -10,14 +10,13 @@ from time_series import *
 
 outputdir = '/srv/shared/wiggles'
 inputfile = 'arrivals.csv'
-TBeforeArrival = 5.
-TAfterArrival = 5.
+TBeforeArrival = 10.
+TAfterArrival = 10.
 LeapSecondFudge = 27  # Fudge factor.  Subtract this from all times.
 highpassfiltercorner = 0.5
 timebuffer = 15.
 common_sample_rate = 100.  # in Hz
 client = Client("IRIS")
-etype = 'EQP'
 label = 'test'
 
 #---- Function to read infile
@@ -48,34 +47,31 @@ def parse_input_file(filename):
 #----- Start the main program
 
 etype_dict = parse_input_file(inputfile)
-
 taperlen = (3./highpassfiltercorner)
-
-f0 = open(label + ".in",'w')
-f1 = open(label + ".out.database",'w')
 
 #----- Sweep through each arrival, download Z+N+E data, write as mseed file
 
 n = 0
-downloaded_netstatloc = []
-etype_list = ['EQP','SUP','THP','SNP','PXP']
-#etype_list = ['EQS','SUS','THS','SNS','PXS']
+#etype_list = ['EQP','SUP','THP','SNP','PXP']
+etype_list = ['EQS','SUS','THS','SNS','PXS']
+#etype_list = ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']
 for etype in etype_list:
- n = 0
- for row in etype_dict[etype]:
-#  if ( n < 8 ):   # put on the brakes, just for testing
-    net = row['net']
-    stat = row['sta']
-    loc = row['loc']
-    if ( loc == "" ):
-        loc = "--"
-    chan = row['chan']
-    phase = row['pick_type']
-    qual = row['quality']
-    sncl = net + '.' + stat + '.' + loc + '.' + chan
-    netstatloc = net + '.' + stat + '.' + loc 
-    if ( netstatloc not in downloaded_netstatloc ):
-        downloaded_netstatloc.append(netstatloc)
+    f0 = open(label + "." + etype + ".in",'w')
+    f1 = open(label + "." + etype + ".out.database",'w')
+    n = 0
+    for row in etype_dict[etype]:
+#    if ( n < 8 ):   # put on the brakes, just for testing
+        time.sleep(0.025)  # make sure we don't request data too fast
+        net = row['net']
+        stat = row['sta']
+        loc = row['loc']
+        if ( loc == "" ):
+            loc = "--"
+        chan = row['chan']
+        phase = row['pick_type']
+        qual = row['quality']
+        sncl = net + '.' + stat + '.' + loc + '.' + chan
+        netstatloc = net + '.' + stat + '.' + loc 
         utoriginal = float(row['time'])
         unixtime = float(row['time']) - LeapSecondFudge
         ut = UTCDateTime(unixtime)
@@ -150,5 +146,6 @@ for etype in etype_list:
         except:
             print("Download failed for ",fname)
 
-f0.close()
-f1.close()
+    f0.close()
+    f1.close()
+
