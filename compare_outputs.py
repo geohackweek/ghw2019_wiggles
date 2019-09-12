@@ -63,13 +63,26 @@ def key_lookup(event):
         opp_phase = 'S'
     secondary_key = event[0] + "-" + event[1] + "-" + opp_phase
     
-    if primary_key in model_dict.keys(): #same phase detected
+    if primary_key in model_dict.keys(): # same phase detected
         times = [event[2], model_dict[primary_key]]
     elif secondary_key in model_dict.keys(): # opposite phase
         times = [opp_phase, model_dict[secondary_key]]
     else: # not detected
         times = ['N', [numpy.nan]] 
     return times
+
+def filter_time(t, time_arr):
+    t_lower = t - timedelta(seconds=5)
+    t_upper = t + timedelta(seconds=5) 
+    outp_file.write(str(event[5]) + " " + str(phase))
+    offsets = []
+    for time in time_arr:
+        if time > t_lower and time < t_upper:
+            offset = abs(t - time)
+            offset = offset.total_seconds()
+            offsets.push(offset)
+        elif time == numpy.nan:
+            offsets.push(offset)
 
 
 outp_file = open(outp_name, 'w')
@@ -78,10 +91,6 @@ for event in truth_arr:
     phase = phases_times[0]
     res = phases_times[1]
     
-    # filter events in +-5s time window
-    t = event[3] 
-    t_lower = t - timedelta(seconds=5)
-    t_upper = t + timedelta(seconds=5) 
     outp_file.write(str(event[5]) + " " + str(phase))
     for time in res:
         if time > t_lower and time < t_upper:
