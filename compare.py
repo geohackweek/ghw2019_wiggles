@@ -8,10 +8,7 @@ import csv
 from datetime import datetime
 from datetime import timedelta
 
-# ------------------- dirs need updating ---------------
-model_file = 'output_files/GPD.EQS.out'
-truth_file = 'arrivals.csv'
-outp_name = 'comparison_out/comparison.out'
+# params
 fudge_factor = timedelta(seconds=27)
 padding_time = 10
 
@@ -30,22 +27,8 @@ for etype in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
     comp_out.append("comparison_out/comp." + etype + ".out")
 
 # ------------------
-# Read in PNSN .csv data and store it as an array
-"""
-def read_arrivals_to_list(filename):
-    model_list = []
-    with open(filename) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            line = []
-            line.extend([row[3].strip(), row[2].strip(), row[6].strip()])
-            formatted_time = datetime.fromtimestamp(float(row[1].strip())) - fudge_factor
-            line.extend([formatted_time, row[7].strip(), row[0].strip()+row[6].strip()])
-            model_list.append(line)
-    return model_list
-truth_arr = read_arrivals_to_list(truth_file)
-"""
-def read_arrivals (filename):
+# read in UW arrival times as an array
+def read_arrivals_to_arr(filename):
     model_list = []
     with open(filename) as f:
         for ln in f:
@@ -56,7 +39,7 @@ def read_arrivals (filename):
             formatted_time = datetime.strptime(row[3], "%Y-%m-%dT%H:%M:%S.%f") - fudge_factor # parse str to datetime object
             line.extend([formatted_time, row[4].strip(), row[5].strip()])
             model_list.append(line)
-    return model_list
+    return model_list 
 
 # read in Caltech model output and create a dictionary
 def read_output_to_dict(filename):
@@ -73,10 +56,9 @@ def read_output_to_dict(filename):
             except:
                 pass
     return model_dict
-model_dict = read_output_to_dict(model_file)
 
 # search for arrivals within +- 10s window
-def key_lookup(event, phase):
+def key_lookup(event, phase, model_dict):
     t = event[3] 
     t_lower = t - timedelta(seconds=padding_time)
     t_upper = t + timedelta(seconds=padding_time) 
@@ -98,20 +80,20 @@ def time_lookup(t, time_arr):
             offsets.append(offset)
     return offsets 
 
-
 def execute_script(arrival, inf, outf, comp_out):
     # write outputs to file
     outp_file = open(comp_out, 'w')
-    truth_arr = read_arrivals(arrival)
+    truth_arr = read_arrivals_to_arr(arrival)
+    model_dict = read_output_to_dict(outf)
     for event in truth_arr:
         phase = event[2]
-        times = key_lookup(event, phase)
+        times = key_lookup(event, phase, model_dict)
         if len(times) == 0:
             if phase == 'P':
                 phase = 'S'
             else:
                 phase = 'P'
-            times = key_lookup(event, phase)
+            times = key_lookup(event, phase, model_dict)
         if len(times) == 0:
             phase = 'N'
             times = ['nan']
