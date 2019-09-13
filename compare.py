@@ -81,10 +81,10 @@ def time_lookup(t, time_arr):
             offsets.append(offset)
     return offsets 
 
-'''
-def execute_script(truth_arr, outp_name):
- # write outputs to file
-    outp_file = open(outp_name, 'w')
+
+def execute_script(inf, outf, comp_out):
+    # write outputs to file
+    outp_file = open(comp_out, 'w')
     for event in truth_arr:
         phase = event[2]
         times = key_lookup(event, phase)
@@ -102,24 +102,7 @@ def execute_script(truth_arr, outp_name):
             outp_file.write(" " + str(offset))
         outp_file.write('\n')
     outp_file.close()   
-'''
+
+for i in range(len(model_out)):
+    execute_script(model_in[i], model_out[i], comp_out[i])
     
- # write outputs to file
-outp_file = open(outp_name, 'w')
-for event in truth_arr:
-    phase = event[2]
-    times = key_lookup(event, phase)
-    if len(times) == 0:
-        if phase == 'P':
-            phase = 'S'
-        else:
-            phase = 'P'
-        times = key_lookup(event, phase)
-    if len(times) == 0:
-        phase = 'N'
-        times = ['nan']
-    outp_file.write(str(event[5]) + " " + phase)
-    for offset in times:
-        outp_file.write(" " + str(offset))
-    outp_file.write('\n')
-outp_file.close() 
