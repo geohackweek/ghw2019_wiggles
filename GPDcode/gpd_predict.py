@@ -36,7 +36,7 @@ freq_max = 20.0
 filter_data = True
 decimate_data = False # If false, assumes data is already 100 Hz samprate
 n_shift = 10 # Number of samples to shift the sliding window at a time
-n_gpu = 3 # Number of GPUs to use (if any)
+n_gpu = 0 # Number of GPUs to use (if any)
 #####################
 batch_size = 1000*3
 
