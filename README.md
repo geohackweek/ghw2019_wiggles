@@ -14,8 +14,10 @@ Arrival data were querried from arrivals (table: arrival) from the PNSN AQMS dat
 # Preprocessing
 
 # Environment setup
+```
 conda env create --file environment.yml
 conda activate seismic-wiggles-env
+```
 
 # Contributors
 * [Jon Connolly](https://github.com/joncon)  joncon@uw.edu
