@@ -9,26 +9,25 @@ from datetime import datetime
 from datetime import timedelta
 
 # ------------------- dirs need updating ---------------
-model_file = 'GPD.THP.out'
+model_file = 'output_files/GPD.EQS.out'
 truth_file = 'arrivals.csv'
-outp_name = 'comparison.out'
+outp_name = 'comparison_out/comparison.out'
 fudge_factor = timedelta(seconds=27)
 padding_time = 10
 
 # file dirs
-model_out = []
 model_in = []
-outp_out = []
+model_out = []
+comp_out = []
 for etype in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
-    outfile = 'GPD.' + etype + ".out"
-    infile = 'GPD.' + etype + ".in"
-    model_out.append(outfile)
+    infile = 'input_files/GPD.' + etype + ".in"
+    outfile = 'output_files/GPD.' + etype + ".out"
     model_in.append(infile)
-    outp_out.append("comp." + etype + ".out")
+    model_out.append(outfile)
+    comp_out.append("comparison_out/comp." + etype + ".out")
 
 # ------------------
 # Read in PNSN .csv data and store it as an array
-truth_arr = []
 def read_arrivals_to_list(filename):
     model_list = []
     with open(filename) as csv_file:
@@ -49,14 +48,17 @@ def read_output_to_dict(filename):
         for line in f:
             tmp = line.split()
             key = tmp[0] + "-" + tmp[1] + "-" + tmp[2]
-            formatted_time = datetime.strptime(tmp[3], "%Y-%m-%dT%H:%M:%S.%f") # parse str to datetime object
-            if key not in model_dict:
-                model_dict[key] = []
-            model_dict[key].append(formatted_time) 
+            try: # fails if date is missing floating point numbers
+                formatted_time = datetime.strptime(tmp[3], "%Y-%m-%dT%H:%M:%S.%f") # parse str to datetime object
+                if key not in model_dict:
+                    model_dict[key] = []
+                model_dict[key].append(formatted_time) 
+            except:
+                pass
     return model_dict
 model_dict = read_output_to_dict(model_file)
 
-# search for arrivals within +- 5s window
+# search for arrivals within +- 10s window
 def key_lookup(event, phase):
     t = event[3] 
     t_lower = t - timedelta(seconds=padding_time)
@@ -79,8 +81,9 @@ def time_lookup(t, time_arr):
             offsets.append(offset)
     return offsets 
 
+'''
 def execute_script(truth_arr, outp_name):
-    # write outputs to file
+ # write outputs to file
     outp_file = open(outp_name, 'w')
     for event in truth_arr:
         phase = event[2]
@@ -98,7 +101,25 @@ def execute_script(truth_arr, outp_name):
         for offset in times:
             outp_file.write(" " + str(offset))
         outp_file.write('\n')
-    outp_file.close()
+    outp_file.close()   
+'''
     
-for file in model_out:
-    execute_script(file, )
+ # write outputs to file
+outp_file = open(outp_name, 'w')
+for event in truth_arr:
+    phase = event[2]
+    times = key_lookup(event, phase)
+    if len(times) == 0:
+        if phase == 'P':
+            phase = 'S'
+        else:
+            phase = 'P'
+        times = key_lookup(event, phase)
+    if len(times) == 0:
+        phase = 'N'
+        times = ['nan']
+    outp_file.write(str(event[5]) + " " + phase)
+    for offset in times:
+        outp_file.write(" " + str(offset))
+    outp_file.write('\n')
+outp_file.close() 
