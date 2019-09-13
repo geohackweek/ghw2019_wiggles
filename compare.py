@@ -9,12 +9,9 @@ from datetime import datetime
 from datetime import timedelta
 
 # params
+padding_time = 60
 fudge_factor = timedelta(seconds=27)
-#fudge_factor = timedelta(seconds=0)
-padding_time = 10
-#mess_factor = timedelta(minutes=1) # added to .in data
-#mess_factor = timedelta(minutes=0)
-mess_factor = - timedelta(seconds=10)
+time_diff = timedelta(seconds=10)
 
 # file dirs
 parsed_arrivals = []
@@ -28,7 +25,7 @@ for etype in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
     parsed_arrivals.append(arrival)
     model_in.append(infile)
     model_out.append(outfile)
-    comp_out.append("comparison_out/comp." + etype + ".out")
+    comp_out.append("comparison_out/comp." + etype + ".out") # make csv
 
 # ------------------
 # read in UW arrival times as an array
@@ -49,7 +46,6 @@ def arrivals_to_dictionary(arrivals):
     for arr in arrivals:
         key = datetime.strftime(arr[3], "%Y-%m-%dT%H:%M:%S.%f")
         key = key[0:len(key)-10]
-        print(key)
         picks[key] = arr
     return picks
 
@@ -57,13 +53,24 @@ def model_in_to_array(file):
     timestamps = []
     with open(file) as f:
         for ln in f:
-            entry = ln.split()
+            entry = ln.split() 
             entry = entry[0].strip()
-            entry = entry[len(entry)-20:len(entry)-6]
-            entry = entry[0:4] + "-" + entry[4:6] + "-" + entry[6:8] + "T" + entry[8:10] + ":" + entry [10:12] + ":" + entry[12:14]
-            time = datetime.strptime(entry, "%Y-%m-%dT%H:%M:%S") + mess_factor  # parse str to datetime object
-            # !! may need additional time filtering according to station and network in case there is the same arrival time 
-            time = datetime.strftime(time, "%Y-%m-%dT%H:%M")
+            entry = entry[len(entry)-20:len(entry)-6] # 20120402154300
+            entry = entry[0:4] + "-" + entry[4:6] + "-" + entry[6:8] + "T" + entry[8:10] + ":" + entry[10:12] + ":" +  entry[12:14] 
+            time = datetime.strptime(entry, "%Y-%m-%dT%H:%M:%S") # parse str to datetime object
+            old_time = time
+            if time.second >=37 and time.second <=51:
+                time = time + timedelta(seconds=23)
+                time = datetime.strftime(time, "%Y-%m-%dT%H:%M:%S")
+            else:
+                sec_int = time.second + 23
+                if sec_int > 59:
+                    sec_int = sec_int - 60
+                   # print('59')
+                sec_int = str(sec_int).zfill(2)
+                time = datetime.strftime(time, "%Y-%m-%dT%H:%M:%S")
+                time = time[:-2] + sec_int
+            #print('old time: ', entry, old_time, time)     
             timestamps.append(time)
     return timestamps
 
@@ -96,10 +103,12 @@ def key_lookup(event, phase, model_dict):
     t_lower = t - timedelta(seconds=padding_time)
     t_upper = t + timedelta(seconds=padding_time) 
     key = event[0] + "-" + event[1] + "-" + phase
+    #print(key, model_dict.keys())
     times = []
     if key in model_dict.keys():
         times = model_dict[key]
         times = time_lookup(event[3], times)
+    #print(times)
     return times
 
 def time_lookup(t, time_arr):
@@ -116,11 +125,16 @@ def time_lookup(t, time_arr):
 def execute_script(arrival, inf, outf, comp_out):
     # write outputs to file
     outp_file = open(comp_out, 'w')
+    
     truth_arr = read_arrivals_to_arr(arrival) # read in arrival.csv
-    truth_dict = arrivals_to_dictionary(truth_arr) 
-    model_in = model_in_to_array(inf) # read in model .in file
-    filtered_arr = filter_times(truth_dict, model_in) # filter the file
-    truth_arr = filtered_arr
+    #print('truth:', truth_arr)
+    #truth_dict = arrivals_to_dictionary(truth_arr)
+    #print(truth_dirct)
+    
+    #model_in = model_in_to_array(inf) # read in model .in file
+    #filtered_arr = filter_times(truth_dict, model_in) # filter the file
+    
+    #truth_arr = filtered_arr
     model_dict = read_output_to_dict(outf)
     for event in truth_arr:
         phase = event[2]
@@ -134,12 +148,14 @@ def execute_script(arrival, inf, outf, comp_out):
         if len(times) == 0:
             phase = 'N'
             times = ['nan']
-        outp_file.write(str(event[5]) + " " + phase)
+        outp_file.write(str(event[5]) + ", " + phase)
         for offset in times:
-            outp_file.write(" " + str(offset))
+            outp_file.write(", " + str(offset))
+            #print(offset)
         outp_file.write('\n')
     outp_file.close()   
 
 for i in range(len(model_out)):
+#for i in range(4, 5):
     execute_script(parsed_arrivals[i], model_in[i], model_out[i], comp_out[i])
     
