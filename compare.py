@@ -10,7 +10,10 @@ from datetime import timedelta
 
 # params
 fudge_factor = timedelta(seconds=27)
+#fudge_factor = timedelta(seconds=0)
 padding_time = 10
+#mess_factor = timedelta(minutes=1) # added to .in data
+mess_factor = timedelta(minutes=1)
 
 # file dirs
 parsed_arrivals = []
@@ -33,7 +36,6 @@ def read_arrivals_to_arr(filename):
     with open(filename) as f:
         for ln in f:
             row = ln.split()
-            model_list
             line = []
             line.extend([row[0].strip(), row[1].strip(), row[2].strip()])
             formatted_time = datetime.strptime(row[3], "%Y-%m-%dT%H:%M:%S.%f") - fudge_factor # parse str to datetime object
@@ -45,13 +47,30 @@ def arrivals_to_dictionary(arrivals):
     picks = {}
     for arr in arrivals:
         key = datetime.strftime(arr[3], "%Y-%m-%dT%H:%M:%S.%f")
+        key = key[0:len(key)-7]
         picks[key] = arr
+    return picks
 
-#def model_in_to_dictionary(file):
-    
-        
-#def filter_arrivals(arrivals, model_in_arrivals):
-    
+def model_in_to_array(file):
+    timestamps = []
+    with open(file) as f:
+        for ln in f:
+            entry = ln.split()
+            entry = entry[0].strip()
+            entry = entry[len(entry)-20:len(entry)-6]
+            entry = entry[0:4] + "-" + entry[4:6] + "-" + entry[6:8] + "T" + entry[8:10] + ":" + entry [10:12] + ":" + entry[12:14]
+            time = datetime.strptime(entry, "%Y-%m-%dT%H:%M:%S") + mess_factor  # parse str to datetime object
+            # !! may need additional time filtering according to station and network in case there is the same arrival time 
+            time = datetime.strftime(time, "%Y-%m-%dT%H:%M:%S")
+            timestamps.append(time)
+    return timestamps
+
+def filter_times(arrivals, model_in):
+    filtered = []
+    for key in model_in:
+        if key in arrivals:
+            filtered.append(arrivals[key])
+    return filtered
 
 # read in Caltech model output and create a dictionary
 def read_output_to_dict(filename):
@@ -95,11 +114,11 @@ def time_lookup(t, time_arr):
 def execute_script(arrival, inf, outf, comp_out):
     # write outputs to file
     outp_file = open(comp_out, 'w')
-    truth_arr = read_arrivals_to_arr(arrival)
-    truth_dict = arrivals_to_dictionary(truth_arr)
-    # read .in data
-    # filter arrivals
-    
+    truth_arr = read_arrivals_to_arr(arrival) # read in arrival.csv
+    truth_dict = arrivals_to_dictionary(truth_arr) 
+    model_in = model_in_to_array(inf) # read in model .in file
+    filtered_arr = filter_times(truth_dict, model_in) # filter the file
+    truth_arr = filtered_arr
     model_dict = read_output_to_dict(outf)
     for event in truth_arr:
         phase = event[2]
