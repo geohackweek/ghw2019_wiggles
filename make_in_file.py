@@ -4,7 +4,7 @@ outdir = '/srv/shared/wiggles'
 for etype in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
     outfile = 'GPD.' + etype + ".in"
     f0 = open(outfile,'w')
-    mseedlist = glob.glob(outdir + "/" + etype + "/" + "*N.201*mseed" )
+    mseedlist = glob.glob(outdir + "/" + etype + "/" + "*N.20*mseed" )
     print("Creating: ", outfile )
     for mseedN in mseedlist:
         chanN = "." + mseedN.split('.')[3] + "." 

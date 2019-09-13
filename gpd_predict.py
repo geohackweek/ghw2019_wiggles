@@ -171,7 +171,8 @@ if __name__ == "__main__":
         from keras.utils import multi_gpu_model
         model = multi_gpu_model(model, gpus=n_gpu)
 
-    ofile = open(args.O, 'w')
+#    ofile = open(args.O, 'w')
+    ofile = open(args.O, 'a')
 
     for i in range(nsta):
         fname = fdir[i][0].split("/")
