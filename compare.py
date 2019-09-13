@@ -13,7 +13,8 @@ fudge_factor = timedelta(seconds=27)
 #fudge_factor = timedelta(seconds=0)
 padding_time = 10
 #mess_factor = timedelta(minutes=1) # added to .in data
-mess_factor = timedelta(minutes=1)
+#mess_factor = timedelta(minutes=0)
+mess_factor = - timedelta(seconds=10)
 
 # file dirs
 parsed_arrivals = []
@@ -47,7 +48,8 @@ def arrivals_to_dictionary(arrivals):
     picks = {}
     for arr in arrivals:
         key = datetime.strftime(arr[3], "%Y-%m-%dT%H:%M:%S.%f")
-        key = key[0:len(key)-7]
+        key = key[0:len(key)-10]
+        print(key)
         picks[key] = arr
     return picks
 
@@ -61,7 +63,7 @@ def model_in_to_array(file):
             entry = entry[0:4] + "-" + entry[4:6] + "-" + entry[6:8] + "T" + entry[8:10] + ":" + entry [10:12] + ":" + entry[12:14]
             time = datetime.strptime(entry, "%Y-%m-%dT%H:%M:%S") + mess_factor  # parse str to datetime object
             # !! may need additional time filtering according to station and network in case there is the same arrival time 
-            time = datetime.strftime(time, "%Y-%m-%dT%H:%M:%S")
+            time = datetime.strftime(time, "%Y-%m-%dT%H:%M")
             timestamps.append(time)
     return timestamps
 
