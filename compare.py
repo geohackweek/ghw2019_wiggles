@@ -148,7 +148,7 @@ def execute_script(arrival, inf, outf, comp_out):
         if len(times) == 0:
             phase = 'N'
             times = ['nan']
-        outp_file.write(str(event[5]) + ", " + phase)
+        outp_file.write(str(event[5]) + " " + phase)
         for offset in times:
             outp_file.write(", " + str(offset))
             #print(offset)
