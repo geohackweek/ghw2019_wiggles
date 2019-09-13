@@ -39,7 +39,19 @@ def read_arrivals_to_arr(filename):
             formatted_time = datetime.strptime(row[3], "%Y-%m-%dT%H:%M:%S.%f") - fudge_factor # parse str to datetime object
             line.extend([formatted_time, row[4].strip(), row[5].strip()])
             model_list.append(line)
-    return model_list 
+    return model_list
+
+def arrivals_to_dictionary(arrivals):
+    picks = {}
+    for arr in arrivals:
+        key = datetime.strftime(arr[3], "%Y-%m-%dT%H:%M:%S.%f")
+        picks[key] = arr
+
+#def model_in_to_dictionary(file):
+    
+        
+#def filter_arrivals(arrivals, model_in_arrivals):
+    
 
 # read in Caltech model output and create a dictionary
 def read_output_to_dict(filename):
@@ -84,6 +96,10 @@ def execute_script(arrival, inf, outf, comp_out):
     # write outputs to file
     outp_file = open(comp_out, 'w')
     truth_arr = read_arrivals_to_arr(arrival)
+    truth_dict = arrivals_to_dictionary(truth_arr)
+    # read .in data
+    # filter arrivals
+    
     model_dict = read_output_to_dict(outf)
     for event in truth_arr:
         phase = event[2]
