@@ -16,18 +16,22 @@ fudge_factor = timedelta(seconds=27)
 padding_time = 10
 
 # file dirs
+parsed_arrivals = []
 model_in = []
 model_out = []
 comp_out = []
 for etype in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
-    infile = 'input_files/GPD.' + etype + ".in"
-    outfile = 'output_files/GPD.' + etype + ".out"
+    infile = "input_files/GPD." + etype + ".in"
+    outfile = "output_files/GPD." + etype + ".out"
+    arrival = "parsed_arrivals/" + etype + ".arrivals.txt"
+    parsed_arrivals.append(arrival)
     model_in.append(infile)
     model_out.append(outfile)
     comp_out.append("comparison_out/comp." + etype + ".out")
 
 # ------------------
 # Read in PNSN .csv data and store it as an array
+"""
 def read_arrivals_to_list(filename):
     model_list = []
     with open(filename) as csv_file:
@@ -40,6 +44,19 @@ def read_arrivals_to_list(filename):
             model_list.append(line)
     return model_list
 truth_arr = read_arrivals_to_list(truth_file)
+"""
+def read_arrivals (filename):
+    model_list = []
+    with open(filename) as f:
+        for ln in f:
+            row = ln.split()
+            model_list
+            line = []
+            line.extend([row[0].strip(), row[1].strip(), row[2].strip()])
+            formatted_time = datetime.strptime(row[3], "%Y-%m-%dT%H:%M:%S.%f") - fudge_factor # parse str to datetime object
+            line.extend([formatted_time, row[4].strip(), row[5].strip()])
+            model_list.append(line)
+    return model_list
 
 # read in Caltech model output and create a dictionary
 def read_output_to_dict(filename):
@@ -82,9 +99,10 @@ def time_lookup(t, time_arr):
     return offsets 
 
 
-def execute_script(inf, outf, comp_out):
+def execute_script(arrival, inf, outf, comp_out):
     # write outputs to file
     outp_file = open(comp_out, 'w')
+    truth_arr = read_arrivals(arrival)
     for event in truth_arr:
         phase = event[2]
         times = key_lookup(event, phase)
@@ -104,5 +122,5 @@ def execute_script(inf, outf, comp_out):
     outp_file.close()   
 
 for i in range(len(model_out)):
-    execute_script(model_in[i], model_out[i], comp_out[i])
+    execute_script(parsed_arrivals[i], model_in[i], model_out[i], comp_out[i])
     

@@ -1,7 +1,5 @@
-
-#$:sed 's/\[//g' Labeled_arrivals_from_database.txt | sed 's/\]//g' | sed "s/'//g" > arrivals.csv
-
 import csv
+
 def parse_input_file(filename):
     request = {}
     for t in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
@@ -25,4 +23,5 @@ def parse_input_file(filename):
     return request
 
 res = parse_input_file('arrivals.csv')
+
     
