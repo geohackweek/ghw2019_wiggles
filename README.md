@@ -13,13 +13,19 @@ Arrival data were querried from arrivals (table: arrival) from the PNSN AQMS dat
 
 # Preprocessing
 
+# Environment setup
+```
+conda env create --file environment.yml
+conda activate seismic-wiggles-env
+```
+
 # Contributors
-* Jon Connolly joncon@uw.edu
-* Bao Tran Do trando46@gmail.com
-* Ariane Ducellier ducela@uw.edu
-* Alex Hutko ahutko@uw.edu 
-* Gabija Pasiunaite gabija.pasiunaite@gmail.com
-* Rhythm Shah rhythm_shah99@yahoo.com
-* Liang Xue  xlia@okstate.edu
+* [Jon Connolly](https://github.com/joncon)  joncon@uw.edu
+* Bao Tran Do  trando46@gmail.com
+* Ariane Ducellier  ducela@uw.edu
+* [Alex Hutko](https://github.com/alexhutko)  ahutko@uw.edu 
+* [Gabija Pasiunaite](https://github.com/pasiunaite)  gabija.pasiunaite@gmail.com
+* Rhythm Shah  rhythm_shah99@yahoo.com
+* [Liang Xue](https://github.com/droxliang)  xlia@okstate.edu
 
 
