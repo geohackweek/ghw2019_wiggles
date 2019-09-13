@@ -13,6 +13,18 @@ model_file = 'GPD.THP.out'
 truth_file = 'arrivals.csv'
 outp_name = 'comparison.out'
 fudge_factor = timedelta(seconds=27)
+padding_time = 10
+
+# file dirs
+model_out = []
+model_in = []
+outp_out = []
+for etype in ['EQS','EQP','SUS','SUP','THS','THP','SNS','SNP','PXS','PXP']:
+    outfile = 'GPD.' + etype + ".out"
+    infile = 'GPD.' + etype + ".in"
+    model_out.append(outfile)
+    model_in.append(infile)
+    outp_out.append("comp." + etype + ".out")
 
 # ------------------
 # Read in PNSN .csv data and store it as an array
@@ -47,8 +59,8 @@ model_dict = read_output_to_dict(model_file)
 # search for arrivals within +- 5s window
 def key_lookup(event, phase):
     t = event[3] 
-    t_lower = t - timedelta(seconds=5)
-    t_upper = t + timedelta(seconds=5) 
+    t_lower = t - timedelta(seconds=padding_time)
+    t_upper = t + timedelta(seconds=padding_time) 
     key = event[0] + "-" + event[1] + "-" + phase
     times = []
     if key in model_dict.keys():
@@ -57,8 +69,8 @@ def key_lookup(event, phase):
     return times
 
 def time_lookup(t, time_arr):
-    t_lower = t - timedelta(seconds=5)
-    t_upper = t + timedelta(seconds=5) 
+    t_lower = t - timedelta(seconds=padding_time)
+    t_upper = t + timedelta(seconds=padding_time) 
     offsets = []
     for time in time_arr:
         if time > t_lower and time < t_upper:
@@ -67,22 +79,26 @@ def time_lookup(t, time_arr):
             offsets.append(offset)
     return offsets 
 
-# write outputs to file
-outp_file = open(outp_name, 'w')
-for event in truth_arr:
-    phase = event[2]
-    times = key_lookup(event, phase)
-    if len(times) == 0:
-        if phase == 'P':
-            phase = 'S'
-        else:
-            phase = 'P'
+def execute_script(truth_arr, outp_name):
+    # write outputs to file
+    outp_file = open(outp_name, 'w')
+    for event in truth_arr:
+        phase = event[2]
         times = key_lookup(event, phase)
-    if len(times) == 0:
-        phase = 'N'
-        times = ['nan']
-    outp_file.write(str(event[5]) + " " + phase)
-    for offset in times:
-        outp_file.write(" " + str(offset))
-    outp_file.write('\n')
-outp_file.close()
+        if len(times) == 0:
+            if phase == 'P':
+                phase = 'S'
+            else:
+                phase = 'P'
+            times = key_lookup(event, phase)
+        if len(times) == 0:
+            phase = 'N'
+            times = ['nan']
+        outp_file.write(str(event[5]) + " " + phase)
+        for offset in times:
+            outp_file.write(" " + str(offset))
+        outp_file.write('\n')
+    outp_file.close()
+    
+for file in model_out:
+    execute_script(file, )

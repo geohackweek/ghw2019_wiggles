@@ -1,0 +1,5 @@
+EQP, P, -2.5
+EQP, P, 0.55, 1.3, 3.4  
+EQP, N, NaN             
+EQP, S, 1.4            
+EQP, P, 3.2
