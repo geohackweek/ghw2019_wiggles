@@ -128,7 +128,7 @@ def time_lookup(t, time_arr):
         if time > t_lower and time < t_upper:
             offset = t - time # or format time to absolute value: abs(t - time)
             offset = offset.total_seconds()
-            offsets.append(offset)
+            offsets.append('{:.6f}'.format(offset))
     return offsets 
 
 def execute_script(arrival, inf, outf, comp_out):
