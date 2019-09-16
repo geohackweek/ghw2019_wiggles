@@ -9,7 +9,7 @@ The scope of the Wiggle project has two goals. 1) Test and asses the [Generalize
 * SN - Sonic Shockwave: jets breaking the sound barrier, bolides exploding in the atmosphere...
 
 # Data
-Arrival data were querried from arrivals (table: arrival) from the PNSN AQMS database ([schema is in "parametric info"](http://www.ncedc.org/db/)) and are in the [arrivals.csv] (https://github.com/geohackweek/ghw2019_wiggles/blob/master/arrivals.csv) file. Pick data were then used to download the waveform data from [IRIS](http://ds.iris.edu/ds) using [get_waveform_data.py] (https://github.com/geohackweek/ghw2019_wiggles/blob/master/get_waveform_data.py).  Only data which were gapless and had 3 components available (Vertical, North-South, and East-West) were used.
+Arrival data were querried from arrivals (table: arrival) from the PNSN AQMS database ([schema is in "parametric info"](http://www.ncedc.org/db/)) and are in the [arrivals.csv](https://github.com/geohackweek/ghw2019_wiggles/blob/master/arrivals.csv) file. Pick data were then used to download the waveform data from [IRIS](http://ds.iris.edu/ds) using [get_waveform_data.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/get_waveform_data.py).  Only data which were gapless and had 3 components available (Vertical, North-South, and East-West) were used.
 
 # Preprocessing
 We chose to use 20 sec long windows centered on the pick arrival to test the GPD algorithm.  We prepared this data by initially downloading 50 sec center of data centered on the pick in order to have a 15 sec buffer on each end of the trace so that filtering effects wouldn't affect the analyzed traces.  All data were:
