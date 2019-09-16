@@ -12,17 +12,17 @@ The scope of the Wiggle project has two goals. 1) Test and asses the [Generalize
 Arrival data were querried from arrivals (table: arrival) from the PNSN AQMS database ([schema is in "parametric info"](http://www.ncedc.org/db/)) and are in the [arrivals.csv](https://github.com/geohackweek/ghw2019_wiggles/blob/master/arrivals.csv) file. Pick data were then used to download the waveform data from [IRIS](http://ds.iris.edu/ds) using [get_waveform_data.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/get_waveform_data.py).  Only data which were gapless and had 3 components available (Vertical, North-South, and East-West) were used.
 
 # Preprocessing
-We chose to use 20 sec long windows centered on the pick arrival to test the GPD algorithm.  We prepared this data by initially downloading 50 sec center of data centered on the pick in order to have a 15 sec buffer on each end of the trace so that filtering effects wouldn't affect the analyzed traces.  All data were:
+We chose to use 20 sec long windows centered on the pick arrival to test the GPD algorithm.  We prepared this data by initially downloading 50 sec of data centered on the pick in order to have a 15 sec buffer on each end of the trace so that filtering effects wouldn't affect the analyzed traces.  All data were:
 * demeaned
 * tapered
 * instrument response corrected to velocity using a pre_filt = (0.3, 0.5, 40. 45.)
-* highpass filterd above 0.5 Hz
+* highpass filtered above 0.5 Hz
 * resampled to 100 Hz sampling
 * trimmed to exactly 2000 points (20 sec x 100 sps)
 * written to mseed (about 20kb each file)
 
 # Environment setup
-To run these codes, make sure you setup an appropriate python environment with the correct modules:
+To run these codes, make sure you setup an appropriate python environment with the correct modules using the [environment.yml](https://github.com/geohackweek/ghw2019_wiggles/blob/master/environment.yml):
 ```
 conda env create --file environment.yml
 conda activate seismic-wiggles-env
