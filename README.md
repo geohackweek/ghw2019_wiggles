@@ -27,6 +27,47 @@ To run these codes, make sure you setup an appropriate python environment with t
 conda env create --file environment.yml
 conda activate seismic-wiggles-env
 ```
+# Running the GPD code
+```
+python gpd_predict.py -P -V -I my_infile -O my_outfile
+```
+The -P suppresses plotting.  Infiles can be found in the [input_files folder](https://github.com/geohackweek/ghw2019_wiggles/tree/master/input_files) and are generated with [make_in_file.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/make_in_file.py).
+
+# Analyzing GPD results on data with PNSN picks
+[compare.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/compare.py) is used to read the GPD output and compare with the arrivals.csv file of PNSN picks and tally up results.  Results are in the [comparison_out](https://github.com/geohackweek/ghw2019_wiggles/tree/master/comparison_out) folder.  Note: this was not 100% finished and needs to be hand verified.  [histogram.ipynb](https://github.com/geohackweek/ghw2019_wiggles/blob/master/scripts/histogram.ipynb) in the [scripts](https://github.com/geohackweek/ghw2019_wiggles/blob/master/scripts) folder is a notebook to visualize histograms of all of the results.  Note: this still needs work on details like axis ranges.
+
+Format of ???.arrivals.txt files (info from PNSN database):
+```
+CC TMBU P 2019-08-16T17:54:40.535540 e THP
+CC OBSR P 2019-08-10T07:17:45.080000 e THP
+CC JRO P 2019-08-10T06:39:49.349630 i THP
+```
+Columns:
+net, station, P or S wave, time of arrival*, quality (e=emergent, i=impulsive), label
+Note: time of arrival is true time and does not take into account leap seconds, so they are ahead of unix time (used by the IRIS data center where data are downloaded from) by up to 27 seconds (as of 2019). [Leap Seconds @wikipedia](https://en.wikipedia.org/wiki/Leap_second)
+
+Format of the comp.???.out files:
+```
+PXP P -0.108350
+PXP N nan
+PXP P 7.992490 -0.007510 -2.607510
+PXP P 0.193560
+```
+Columns:
+1) the etype and phase label from PNSN database
+2) the prediction from GPD: P, S.  N = no pick in the window was made.
+3) the difference in time(s) between the picked arrival (at 10 sec into 20 sec seisogram) and the time of the GPD pick(s)
+*need to make sure that if say a PXP goes in and there are predictions for both P and S waves, that it is properly accounted for
+
+*Future analsysis should parse out shallow vs deep and local vs regional or teleseismic events.
+
+# Making a new model to expand labels beyond P & S waves from earthquakes
+[WiggleNet.ipynb](https://github.com/geohackweek/ghw2019_wiggles/blob/master/WiggleNet.ipynb) is a notebook that has the skeleton framework to generate a new model to expand the labels to include P and S waves from other event types, e.g. surface events/avalances (SU), probably quarry blasts (PX), etc.
+Where one *could* go with this:
+* expand labels to include multiple different event types
+* explore using different length time windows to apply the final model to, e.g. use only 1, 5, 10 sec...
+* count lightning strike effects (currently not labeled)
+* surface events (e.g. avalanches) may require longer time windows to correctly discriminate, i.e. explore different length windows' accuracy for different event types
 
 # Contributors
 * [Jon Connolly](https://github.com/joncon)  joncon@uw.edu
@@ -37,4 +78,8 @@ conda activate seismic-wiggles-env
 * Rhythm Shah  rhythm_shah99@yahoo.com
 * [Liang Xue](https://github.com/droxliang)  xlia@okstate.edu
 
+# Internal notes and updates to team Wiggles
+* [Link to private slack channel](https://app.slack.com/client/TG1K11UCV/CN75TD4V6)
+* .mseed files (about 20kb each) are in /srv/shared/wiggles/
+* .mseed file names have been updated and reflect the correct starttime
 
