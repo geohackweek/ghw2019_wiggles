@@ -31,7 +31,21 @@ conda activate seismic-wiggles-env
 ```
 python gpd_predict.py -P -V -I my_infile -O my_outfile
 ```
-The -P suppresses plotting.  Infiles can be found in the [input_files folder](https://github.com/geohackweek/ghw2019_wiggles/tree/master/input_files) and are generated with [make_in_file.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/make_in_file.py).
+The -P suppresses plotting, -V is for verbose output.  Infiles can be found in the [input_files folder](https://github.com/geohackweek/ghw2019_wiggles/tree/master/input_files) and are generated with [make_in_file.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/make_in_file.py).  Initially, we have used the default hyperparameters in the gpd_predicty.py file.
+
+Input files look like:
+```
+/srv/shared/wiggles/THP/CC.SWNB.--.BHN.20190630013836.mseed /srv/shared/wiggles/THP/CC.SWNB.--.BHE.20190630013836.mseed /srv/shared/wiggles/THP/CC.SWNB.--.BHZ.20190630013836.mseed
+/srv/shared/wiggles/THP/CC.SVIC.--.EHN.20190809044412.mseed /srv/shared/wiggles/THP/CC.SVIC.--.EHE.20190809044412.mseed /srv/shared/wiggles/THP/CC.SVIC.--.EHZ.20190809044412.mseed
+/srv/shared/wiggles/THP/CC.CPCO.--.BHN.20130731200435.mseed /srv/shared/wiggles/THP/CC.CPCO.--.BHE.20130731200435.mseed /srv/shared/wiggles/THP/CC.CPCO.--.BHZ.20130731200435.mseed
+```
+Output files look like:
+```
+CC SVIC S 2019-08-09T04:44:45.480000
+CC CPCO P 2013-07-31T20:05:09.800000
+CC CPCO S 2013-07-31T20:05:11.600000
+UW NN19 P 2014-08-18T03:37:55.032000
+```
 
 # Analyzing GPD results on data with PNSN picks
 [compare.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/compare.py) is used to read the GPD output and compare with the arrivals.csv file of PNSN picks and tally up results.  Results are in the [comparison_out](https://github.com/geohackweek/ghw2019_wiggles/tree/master/comparison_out) folder.  Note: this was not 100% finished and needs to be hand verified.  [histogram.ipynb](https://github.com/geohackweek/ghw2019_wiggles/blob/master/scripts/histogram.ipynb) in the [scripts](https://github.com/geohackweek/ghw2019_wiggles/blob/master/scripts) folder is a notebook to visualize histograms of all of the results.  Note: this still needs work on details like axis ranges.
