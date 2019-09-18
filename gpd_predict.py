@@ -261,8 +261,20 @@ if __name__ == "__main__":
             for i in range(3):
                 ax[i].plot(np.arange(st[i].data.size)*dt, st[i].data, c='k', \
                            lw=0.5)
+            sncl = st[0].stats.network + "." + st[0].stats.station + "." + \
+                   st[0].stats.location
+            title = sncl + "   " + str(st[0].stats.starttime)
+            ax[0].set_title(title)
+            ax[0].yaxis.set_label_position('right')
+            ax[1].yaxis.set_label_position('right')
+            ax[2].yaxis.set_label_position('right')
+            ax[0].set_ylabel(st[0].stats.channel)
+            ax[1].set_ylabel(st[1].stats.channel)
+            ax[2].set_ylabel(st[2].stats.channel)
             ax[3].plot(tt, ts[:,0], c='r', lw=0.5)
             ax[3].plot(tt, ts[:,1], c='b', lw=0.5)
+            ax[3].set_ylabel('Probability')
+            ax[3].set_xlabel('Time (s)')
             for p_pick in p_picks:
                 for i in range(3):
                     ax[i].axvline(p_pick-st[0].stats.starttime, c='r', lw=0.5)
