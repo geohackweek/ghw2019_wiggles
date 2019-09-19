@@ -35,17 +35,19 @@ The -P suppresses plotting, -V is for verbose output.  Infiles can be found in t
 
 Input files look like:
 ```
-/srv/shared/wiggles/THP/CC.SWNB.--.BHN.20190630013836.mseed /srv/shared/wiggles/THP/CC.SWNB.--.BHE.20190630013836.mseed /srv/shared/wiggles/THP/CC.SWNB.--.BHZ.20190630013836.mseed
-/srv/shared/wiggles/THP/CC.SVIC.--.EHN.20190809044412.mseed /srv/shared/wiggles/THP/CC.SVIC.--.EHE.20190809044412.mseed /srv/shared/wiggles/THP/CC.SVIC.--.EHZ.20190809044412.mseed
-/srv/shared/wiggles/THP/CC.CPCO.--.BHN.20130731200435.mseed /srv/shared/wiggles/THP/CC.CPCO.--.BHE.20130731200435.mseed /srv/shared/wiggles/THP/CC.CPCO.--.BHZ.20130731200435.mseed
+DATA/EQP/CC.SIFT.--.BHN.20190910154231.mseed DATA/EQP/CC.SIFT.--.BHE.20190910154231.mseed DATA/EQP/CC.SIFT.--.BHZ.20190910154231.mseed
+DATA/EQP/CC.PR05.--.BHN.20190910154231.mseed DATA/EQP/CC.PR05.--.BHE.20190910154231.mseed DATA/EQP/CC.PR05.--.BHZ.20190910154231.mseed
 ```
 Output files look like:
 ```
-CC SVIC S 2019-08-09T04:44:45.480000
-CC CPCO P 2013-07-31T20:05:09.800000
-CC CPCO S 2013-07-31T20:05:11.600000
-UW NN19 P 2014-08-18T03:37:55.032000
+CC SIFT P 2019-09-10T15:42:41.380000
+CC SIFT S 2019-09-10T15:42:43.580000
+CC PR05 P 2019-09-10T15:42:41.020000
+CC PR05 S 2019-09-10T15:42:43.020000
 ```
+Example of plot output from gpd_predict.py:
+
+<img src="https://github.com/geohackweek/ghw2019_wiggles/blob/master/example_GPD_figure.png" width=400 alt="Metric: Noise Floor" />
 
 # Analyzing GPD results on data with PNSN picks
 [compare.py](https://github.com/geohackweek/ghw2019_wiggles/blob/master/compare.py) is used to read the GPD output and compare with the arrivals.csv file of PNSN picks and tally up results.  Results are in the [comparison_out](https://github.com/geohackweek/ghw2019_wiggles/tree/master/comparison_out) folder.  Note: this was not 100% finished and needs to be hand verified.  [histogram.ipynb](https://github.com/geohackweek/ghw2019_wiggles/blob/master/scripts/histogram.ipynb) in the [scripts](https://github.com/geohackweek/ghw2019_wiggles/blob/master/scripts) folder is a notebook to visualize histograms of all of the results.  Note: this still needs work on details like axis ranges.
@@ -73,7 +75,8 @@ Columns:
 3) the difference in time(s) between the picked arrival (at 10 sec into 20 sec seisogram) and the time of the GPD pick(s)
 *need to make sure that if say a PXP goes in and there are predictions for both P and S waves, that it is properly accounted for
 
-*Future analsysis should parse out shallow vs deep and local vs regional or teleseismic events.
+*Next steps:
+The initial database queries were blind to source characteristics beyond etype (EQ, SU), i.e. depth and magnitude were ignored, and were sorted from latest to earliest.  A proper test would be to split data into shallow and deep events and just focus on earthquakes at first.  Also useful would be to bin results according to distance and include local, regional and teleseismic signals.  Finally, there are a few hyperparemeters such as filter corners to consider.*
 
 # Making a new model to expand labels beyond P & S waves from earthquakes
 [WiggleNet.ipynb](https://github.com/geohackweek/ghw2019_wiggles/blob/master/WiggleNet.ipynb) is a notebook that has the skeleton framework to generate a new model to expand the labels to include P and S waves from other event types, e.g. surface events/avalances (SU), probably quarry blasts (PX), etc.
